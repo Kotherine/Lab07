@@ -1,6 +1,4 @@
-//
-// Created by kotherine on 28.04.22.
-//
+// Copyright 2021 Your Name <your_email>
 
 #ifndef INCLUDE_HTTP_SERVER_HPP_
 #define INCLUDE_HTTP_SERVER_HPP_
@@ -72,15 +70,16 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
         res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
         res.set(http::field::content_type, "text/html");
         res.keep_alive(req.keep_alive());
-        res.body() = "The resource '" + std::string(target) + "' was not found.";
+        res.body() = "The resource '" + std::string(target) +
+                     "' was not found.";
         res.prepare_payload();
         return res;
     };
 
     // Возвращает ответ об ошибке сервера
     //auto const server_error = [&req](beast::string_view what) {
-    //  http::response<http::string_body> res{http::status::internal_server_error,
-    //                                        req.version()};
+    //  http::response<http::string_body>
+    //  res{http::status::internal_server_error, req.version()};
     //  res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
     //  res.set(http::field::content_type, "text/html");
     //  res.keep_alive(req.keep_alive());
@@ -91,7 +90,8 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
 
     // Убедимся, что мы можем обработать метод
     if (req.method() != http::verb::post) {
-        return send(bad_request("Unknown HTTP-method. You should use POST method"));
+        return send(bad_request("Unknown HTTP-method. Y"
+          "ou should use POST method"));
     }
 
     // Путь запроса должен быть "/v1/api/suggest".
