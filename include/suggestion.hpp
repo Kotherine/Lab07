@@ -1,6 +1,4 @@
-//
-// Created by kotherine on 28.04.22.
-//
+// Copyright 2021 Your Name <your_email>
 
 #ifndef INCLUDE_SUGGESTION_HPP_
 #define INCLUDE_SUGGESTION_HPP_
