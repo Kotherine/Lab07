@@ -12,6 +12,7 @@ json JsonStorage::get_storage() const {
     return _storage;
 }
 
+// подгрузка хранилища из файла
 void JsonStorage::load(){
     try {
         std::ifstream f(_filename);

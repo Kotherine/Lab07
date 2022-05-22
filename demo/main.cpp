@@ -1,7 +1,7 @@
 // Copyright 2021 Your Name <your_email>
 
 // cd c++_lab07/lab-07-http-server/cmake-build-debug/
-// ./demo 127.0.0.1 80 /
+// sudo ./demo 127.0.0.1 80 /
 // curl  -H 'Content-Type: application/json' --data '{"input":"hel"}' http://localhost/v1/api/suggest
 
 #include <http_server.hpp>

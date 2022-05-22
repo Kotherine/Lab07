@@ -30,11 +30,13 @@ namespace net = boost::asio;            // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;       // from <boost/asio/ip/tcp.hpp>
 using nlohmann::json;
 
-std::string make_json(const json& data) {
+std::string output_response(const json& data) {
+    // вывод в строку через поток
     std::stringstream ss;
     if (data.is_null())
         ss << "No suggestions";
     else
+      // форматирует вывод
         ss << std::setw(4) << data;
     return ss.str();
 }
@@ -42,11 +44,7 @@ std::string make_json(const json& data) {
 // Эта функция создает HTTP-ответ для данного запроса.
 // Тип объекта ответа зависит от содержимого запроса, поэтому интерфейс требует,
 // чтобы вызывающий объект передал общую лямбду для получения ответа.
-template<class Body, class Allocator, class Send>
-void handle_request(
-        beast::string_view doc_root,
-        http::request<Body, http::basic_fields<Allocator>>&& req,
-        Send&& send);
+
 template <class Body, class Allocator, class Send>
 void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
                     Send&& send, const std::shared_ptr<std::timed_mutex>& mutex,
@@ -63,7 +61,7 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
         return res;
     };
 
-    // Возвращает не найденный ответ
+    // Возвращает ненайденный ответ
     auto const not_found = [&req](beast::string_view target) {
         http::response<http::string_body> res{http::status::not_found,
                                               req.version()};
@@ -76,18 +74,6 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
         return res;
     };
 
-    // Возвращает ответ об ошибке сервера
-    //auto const server_error = [&req](beast::string_view what) {
-    //  http::response<http::string_body>
-    //  res{http::status::internal_server_error, req.version()};
-    //  res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-    //  res.set(http::field::content_type, "text/html");
-    //  res.keep_alive(req.keep_alive());
-    //  res.body() = "An error occurred: '" + std::string(what) + "'";
-    //  res.prepare_payload();
-    //  return res;
-    //};
-
     // Убедимся, что мы можем обработать метод
     if (req.method() != http::verb::post) {
         return send(bad_request("Unknown HTTP-method. Y"
@@ -99,13 +85,14 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
         return send(not_found(req.target()));
     }
 
+    // Парсим входные данные
     json input_body;
     try{
         input_body = json::parse(req.body());
     } catch (std::exception& e){
         return send(bad_request(e.what()));
     }
-
+    // Проверяем входные данные
     boost::optional<std::string> input;
     try {
         input = input_body.at("input").get<std::string>();
@@ -116,9 +103,11 @@ void handle_request(http::request<Body, http::basic_fields<Allocator>>&& req,
         return send(bad_request(R"(JSON format: {"input" : "<user_input">})"));
     }
     mutex->lock();
+    // Формируем из отсортированной коллекции предложения для пользователя
     auto result = collection->suggest(input.value());
     mutex->unlock();
-    http::string_body::value_type body = make_json(result);
+    // Ответ
+    http::string_body::value_type body = output_response(result);
     auto const size = body.size();
 
     http::response<http::string_body> res{
@@ -187,7 +176,9 @@ void do_session(net::ip::tcp::socket& socket,
     // В этот момент соединение корректно закрыто.
 }
 
-[[noreturn]]void suggestion_updater(
+
+//Кажждые 15 минут подгружаем данные в коллекцию
+void suggestion_updater(
         const std::shared_ptr<JsonStorage>& storage,
         const std::shared_ptr<CallSuggestions>& suggestions,
         const std::shared_ptr<std::timed_mutex>& mutex) {
@@ -200,5 +191,6 @@ void do_session(net::ip::tcp::socket& socket,
         std::this_thread::sleep_for(std::chrono::minutes(15));
     }
 }
+
 //------------------------------------------------------------------------------
 #endif // INCLUDE_HTTP_SERVER_HPP_

@@ -9,10 +9,12 @@
 
 using json = nlohmann::json;
 
+// json хранилище
 class JsonStorage{
 public:
+    // предотвращает неявное преобразование типов 
     explicit JsonStorage(const std::string filename);
-    [[nodiscard]] json get_storage() const;
+    json get_storage() const;
     void load();
 
 private:

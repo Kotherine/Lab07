@@ -9,6 +9,7 @@
 
 using json = nlohmann::json;
 
+// коллекция предложений
 class CallSuggestions{
 public:
     CallSuggestions();
