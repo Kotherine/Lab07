@@ -184,10 +184,13 @@ void suggestion_updater(
         const std::shared_ptr<std::timed_mutex>& mutex) {
     for (;;) {
         mutex->lock();
+        //загружаем коллекцию из файла
         storage->load();
+        //сортируем коллекцию
         suggestions->update(storage->get_storage());
         mutex->unlock();
         std::cout << "Suggestions updated!" << std::endl;
+        //засыпаем на 15 минут
         std::this_thread::sleep_for(std::chrono::minutes(15));
     }
 }
