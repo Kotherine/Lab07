@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
     //IP
     auto const address = net::ip::make_address(argv[1]);
     //Порт
-    auto const port = static_cast<uint16_t>(std::atoi(argv[2]))
+    auto const port = static_cast<uint16_t>(std::atoi(argv[2]));
 
     // контекст ввода-вывода
     net::io_context ioc{1};
